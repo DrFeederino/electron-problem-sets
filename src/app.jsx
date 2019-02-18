@@ -1,23 +1,25 @@
 import React from 'react';
 import { Motion, spring } from 'react-motion';
-import { userInfo } from 'os';
 
 // To-Do:
 // 2. Make a basic user registration and basic stuff with it
-class User extends React.Component {
-  constructor(props, id, password, isAdmin, isBlocked, username) {
-    super(props);
+
+class User {
+  constructor(id, username, password, isAdmin, isBlocked) {
     this.id = id;
+    this.username = username;
     this.password = password;
     this.isAdmin = isAdmin;
     this.isBlocked = isBlocked;
-    this.username = username;
-    this.isLogged = false;
   }
+}
+
+var users = [ new User("admin", "admin", "admin", true, false)];
+
+class UserHandler extends React.Component {
   handleLogin(event) {
-    this.setState({
-      // how does  one get children's values? document.getDocumentById?
-    });
+    users.push(new User(event.name, event.name, "123", false, false))
+    console.Write(users);
   }
 }
 
@@ -46,7 +48,7 @@ function UserLogin(props) {
               </div>
             </div>
             <button className="button">
-            <div className="contents">
+            <div className="contents" onClick={this.handleLogin}>
               Войти
             </div>
             </button>
@@ -57,16 +59,55 @@ function UserLogin(props) {
   );
 }
 
+function UserLogged(props) {
+  const userProps = User(props);
+  if (userProps.isBlocked) {
+    return (
+      <div className="wrapper">
+        <div className="centerWrapper">
+          <div className="title">
+          Уважаемый, {this.userProps.username}!
+          </div>
+          <div className="subtitle">
+          Сожалеем, но вы были заблокированы администратором!
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="wrapper">
+      <div className="userWrapper">
+        <h4>
+          Добро Пожаловать,
+        </h4>
+        <h5>
+          {this.userProps.username}
+        </h5>
+        <button className="button">
+          <div className="contents">
+            Сменить пароль
+          </div>
+        </button>
+        <button className="button">
+          <div className="contents">
+            Выйти
+          </div>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function Greeting(props) {
-  const isLoggedIn = props.isLoggedIn;
-  if (isLoggedIn) {
-    return <User />;
+  if (users.length > 1) {
+    return <UserLogged userProps={this.props} />;
   }
   return <UserLogin />;
 }
 
 export default class App extends React.Component {
   render() {
-    return (<Greeting isLoggedIn={false} />);
+    return (<Greeting />);
   }
 }
