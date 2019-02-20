@@ -2,7 +2,11 @@ import React from 'react';
 import { Motion, spring } from 'react-motion';
 
 // To-Do:
-// 2. Make a basic user registration and basic stuff with it
+// 1. Offload most of the stuff to different components for better structure
+// 2. Blocking issues
+// 3. Adding users
+// 4. Testing
+// 5. Styling
 
 class User {
   constructor(id, username, password, isBlocked) {
@@ -17,12 +21,13 @@ class UserApp extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      users: [new User(1, 'admin', 'admin', false), new User(2, 'user', 'user', false)],
+      users: [new User(0, 'admin', 'admin', false), new User(1, 'user', 'user', true)],
       username: '',
       password: '',
       isLogged: false,
       user: undefined,
       text: 'Пожалуйста, авторизуйтесь!',
+      isChecked: false,
     };
     this.handleLogin = this.handleLogin.bind(this);
     this.handleUsername = this.handleUsername.bind(this);
@@ -37,28 +42,28 @@ class UserApp extends React.Component {
     if (!this.state.username.length && !this.state.password) {
       return;
     }
-    this.setState({
-      username: this.state.username,
-      password: this.state.password,
-      //user: new User(users.length + 1, this.state.username, this.state.password), for admin only
-    });
-    this.state.users.forEach((user) => {
-      if (this.state.username == user.username) {
-        if (this.state.password == user.password)
+    for (let usr of this.state.users) {
+      if (usr.username === this.state.username) {
+        if (usr.password === this.state.password) {
           this.setState({
             isLogged: !this.state.isLogged,
-            user: new User(this.state.users.length + 1, user.username, user.password, user.isAdmin, user.isBlocked), // Don't know why it doesn't copy user
+            user: Object.assign({}, usr), // ???
             username: '',
             password: '',
           });
-        this.setState({
-          text: 'Вы ввели неверный пароль.',
-        });
+          return;
+        }
+        else {
+          this.setState({
+            text: 'Вы ввели неверный пароль!',
+          });
+          return;
+        }
       }
       this.setState({
-        text: 'Пользователь в системе не найден.',
+        text: 'Пользователь в системе не найден!',
       });
-    });
+    }
   }
 
   handleUsername(e) {
@@ -69,15 +74,20 @@ class UserApp extends React.Component {
     this.setState({ password: e.target.value }); // add filter and number of tries support
   }
 
-  handleBlocking() {
-    this.setState({
-      //users: this.state.user.isBlocked,
-    });
+  handleBlocking(id) { //needs fixing
+    if (this.state.users[id].username !== 'admin') {
+      console.log('here');
+      this.state.users[id].isBlocked = !this.state.users[id].isBlocked;
+      this.setState({
+        users: this.state.users,
+        text: 'successfully blocked',
+      });
+    }
   }
 
   handleLogout() {
     this.setState({
-      isLogged: false,
+      isLogged: !this.state.isLogged,
       user: undefined,
       text: 'Пожалуйста, авторизуйтесь',
     });
@@ -94,7 +104,7 @@ class UserApp extends React.Component {
     });
   }
 
-  render() {
+  render() { 
     // Render Logged in form for Admin and usual people
     if (!this.state.isLogged) {
       return (
@@ -152,7 +162,7 @@ class UserApp extends React.Component {
         <div className="wrapper">
           <div className="centerWrapper">
             <div className="title">
-            Уважаемый, {this.state.username}!
+            Уважаемый, {this.state.user.username}!
             </div>
             <div className="subtitle">
             Сожалеем, но вы были заблокированы администратором!
@@ -170,6 +180,7 @@ class UserApp extends React.Component {
             </h4>
             <h5>
               {this.state.username}
+              {this.state.text}
             </h5>
             <button className="button">
               <div className="contents">
@@ -197,12 +208,16 @@ class UserApp extends React.Component {
             </h5>
             <div>
               {this.state.users.map(user => (
-                <div 
+                <div
                   className="gridRow"
                   key={user.id}
                 >
-                  {user.id}. {user.username} | {user.isBlocked ? '✓' : 'x'}
-                  <input type="checkbox" checked={this.state.user.isBlocked} onChange={this.handleBlocking} />
+                  {user.id + 1}. {user.username} | {user.isBlocked ? '✓' : 'x'}
+                  <input
+                    type="checkbox"
+                    onClick={this.handleBlocking(user.id)}
+                    defaultChecked={this.state.users[user.id].isBlocked}
+                  />
                 </div>
               ))}
             </div>
@@ -233,7 +248,14 @@ class UserApp extends React.Component {
                     />
                   </div>
                 </div>
-                <input type="checkbox" checked={false} onChange={this.handleBlocking} />
+                <div>
+                  Специальный фильтр для пароля: 
+                  <input
+                    type="checkbox"
+                    defaultChecked={this.state.isChecked}
+                    onChange={() => this.state.isChecked ? true : false}
+                  />
+                </div>
             </div>
             <button className="button" onClick={this.handleAdding}>
               <div className="contents">
