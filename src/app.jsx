@@ -22,10 +22,10 @@ class UserApp extends React.Component {
     super(props);
     this.state = {
       users: [new User(0, 'admin', 'admin', false), new User(1, 'user', 'user', true)],
-      username: '',
+      username: '', // these two fields are for adding or logging in
       password: '',
       isLogged: false,
-      user: undefined,
+      user: undefined, // handles currently logged in user
       text: 'Пожалуйста, авторизуйтесь!',
       isChecked: false,
     };
@@ -76,12 +76,13 @@ class UserApp extends React.Component {
 
   handleBlocking(id) { //needs fixing
     if (this.state.users[id].username !== 'admin') {
-      console.log('here');
-      this.state.users[id].isBlocked = !this.state.users[id].isBlocked;
-      this.setState({
-        users: this.state.users,
+      let users = this.state.users;
+      users[id].isBlocked = !users[id].isBlocked;
+      //this.state.users[id].isBlocked = !this.state.users[id].isBlocked;
+     /* this.setState(prevState => ({
+        users: [...users],
         text: 'successfully blocked',
-      });
+      }));*/
     }
   }
 
@@ -94,17 +95,27 @@ class UserApp extends React.Component {
   }
 
   checkUser() {
-    // to do
+    for (let user of this.state.users) {
+      if (user.username === this.state.username) {
+        return true;
+      }
+    } return false;
   }
 
-  handleAdding(e) {
-    checkUser(); // will check if user is not "there"
-    this.setState({
-      users: this.state.users.push(this.state.user),
-    });
+  handleAdding() {
+    if (this.state.username && this.state.password) {
+      let isRegistered = this.checkUser();
+      if (isRegistered) {
+        return;
+      }
+      const user = new User(this.state.users.length, this.state.username, this.state.password, false);
+      this.setState(prevState => ({
+        users: [...prevState.users, user],
+      }));
+    } // will check if user is not "there"
   }
 
-  render() { 
+  render() {
     // Render Logged in form for Admin and usual people
     if (!this.state.isLogged) {
       return (
@@ -180,7 +191,6 @@ class UserApp extends React.Component {
             </h4>
             <h5>
               {this.state.username}
-              {this.state.text}
             </h5>
             <button className="button">
               <div className="contents">
@@ -204,7 +214,8 @@ class UserApp extends React.Component {
               Добро Пожаловать,
             </h4>
             <h5>
-              {this.state.username}
+              {this.state.user.username}
+              {this.state.text}
             </h5>
             <div>
               {this.state.users.map(user => (
@@ -252,8 +263,7 @@ class UserApp extends React.Component {
                   Специальный фильтр для пароля: 
                   <input
                     type="checkbox"
-                    defaultChecked={this.state.isChecked}
-                    onChange={() => this.state.isChecked ? true : false}
+                    defaultChecked={this.state.isChecked} // add onChange event behaviour
                   />
                 </div>
             </div>
