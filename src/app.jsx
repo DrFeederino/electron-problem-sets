@@ -1,10 +1,13 @@
 import React from 'react';
 import { Motion, spring } from 'react-motion';
+import { remote } from 'electron';
+
 
 // To-Do:
 // 1. Offload most of the stuff to different components for better structure
-// 4. Testing - wip
-// 5. Styling - wip
+// 2. Testing - wip
+// 3. Styling - wip
+// 4. Wrap user in a div table and serve it with scroll overflow
 
 class UserApp extends React.Component {
   constructor(props) {
@@ -40,6 +43,8 @@ class UserApp extends React.Component {
 
   handleLogin(e) {
     e.preventDefault();
+    let win = remote.getCurrentWindow();
+    win.setSize(600, 800);
     if (!this.state.username.length && !this.state.password) {
       return;
     }
@@ -229,7 +234,7 @@ class UserApp extends React.Component {
                 </h4>
             </div>
             <div className="gridColumn">
-            <div className="gridwRow">
+            <div className="gridRow">
               <div>
                 ID 
               </div>
@@ -243,6 +248,8 @@ class UserApp extends React.Component {
                 Заблокировать
               </div>
             </div>
+            </div>
+            <div className="gridColumn">
               {this.state.users.map(user => (
                 <div
                   className="gridRow"

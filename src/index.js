@@ -13,13 +13,15 @@ if (isDevMode) enableLiveReload({ strategy: 'react-hmr' });
 const createWindow = async () => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 480,
-    height: 500,
+    height: 550,
+    width: 500,
     frame: true,
     center: true,
     show: false,
-    resizeable: false,
+    resizable: true,
+    maximazable: false,
     closeable: true,
+    title:'Лабораторная работа 1',
   });
 
   // and load the index.html of the app.
