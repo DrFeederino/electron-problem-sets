@@ -45,12 +45,12 @@ class UserApp extends React.Component {
     for (let usr of this.state.users) {
       if (usr.username === this.state.username) {
         if (usr.password === this.state.password) {
-          this.setState({
+          this.setState(prevState => ({
             isLogged: !this.state.isLogged,
-            user: Object.assign({}, usr), // ???
+            user: prevState.users.find(user => user.username === prevState.username), // ???
             username: '',
             password: '',
-          });
+          }));
           return;
         }
         else {
@@ -111,6 +111,8 @@ class UserApp extends React.Component {
       const user = new User(this.state.users.length, this.state.username, this.state.password, false);
       this.setState(prevState => ({
         users: [...prevState.users, user],
+        username: '',
+        password: '',
       }));
     } // will check if user is not "there"
   }
@@ -190,7 +192,7 @@ class UserApp extends React.Component {
               Добро Пожаловать,
             </h4>
             <h5>
-              {this.state.username}
+              {this.state.user.username}
             </h5>
             <button className="button">
               <div className="contents">
@@ -210,23 +212,43 @@ class UserApp extends React.Component {
       return (
         <div className="wrapper">
           <div className="userWrapper">
-            <h4>
-              Добро Пожаловать,
-            </h4>
-            <h5>
-              {this.state.user.username}
-              {this.state.text}
-            </h5>
-            <div>
+            <div className="loginTitle">
+                <h4>
+                  Добро пожаловать, {this.state.user.username}
+                </h4>
+            </div>
+            <div className="gridColumn">
+            <div className="gridwRow">
+              <div>
+                ID 
+              </div>
+              <div>
+                Имя пользователя
+              </div>
+              <div>
+                Заблокирован?
+              </div>
+              <div>
+                Заблокировать
+              </div>
+            </div>
               {this.state.users.map(user => (
                 <div
                   className="gridRow"
                   key={user.id}
                 >
-                  {user.id + 1}. {user.username} | {user.isBlocked ? '✓' : 'x'}
+                <div>
+                  {user.id + 1}.
+                </div>
+                <div>
+                  {user.username} 
+                </div>
+                <div>
+                  {user.isBlocked ? '✓' : 'x'}
+                </div>
                   <input
                     type="checkbox"
-                    onClick={this.handleBlocking(user.id)}
+                    //onClick={this.handleBlocking(user.id)} // it gets called for each object that is created
                     defaultChecked={this.state.users[user.id].isBlocked}
                   />
                 </div>
@@ -266,12 +288,12 @@ class UserApp extends React.Component {
                     defaultChecked={this.state.isChecked} // add onChange event behaviour
                   />
                 </div>
-            </div>
-            <button className="button" onClick={this.handleAdding}>
-              <div className="contents">
-                Добавить пользователя
-              </div>
+                <button className="button" onClick={this.handleAdding}>
+                <div className="contents">
+                  Добавить пользователя
+                </div>
             </button>
+            </div>
             <button className="button" onClick={this.handleLogout} >
               <div className="contents">
                 Выйти
