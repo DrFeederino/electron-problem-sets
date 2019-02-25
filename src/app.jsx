@@ -98,6 +98,8 @@ class UserApp extends React.Component {
       user: undefined,
       text: 'Пожалуйста, авторизуйтесь',
     });
+    let win = remote.getCurrentWindow();
+    win.setSize(500, 550);
   }
 
   checkUser() {
