@@ -3,25 +3,26 @@ import { Motion, spring } from 'react-motion';
 
 // To-Do:
 // 1. Offload most of the stuff to different components for better structure
-// 2. Blocking issues
-// 3. Adding users
-// 4. Testing
-// 5. Styling
-
-class User {
-  constructor(id, username, password, isBlocked) {
-    this.id = id;
-    this.username = username;
-    this.password = password;
-    this.isBlocked = isBlocked;
-  }
-}
+// 4. Testing - wip
+// 5. Styling - wip
 
 class UserApp extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      users: [new User(0, 'admin', 'admin', false), new User(1, 'user', 'user', true)],
+      users: [{
+              id: 0, 
+              username: 'admin',
+              password: 'admin',
+              isBlocked: false
+            }, 
+              {
+              id: 1,
+              username: 'user', 
+              password: 'user', 
+              isBlocked: true,
+            }
+          ],
       username: '', // these two fields are for adding or logging in
       password: '',
       isLogged: false,
@@ -47,7 +48,7 @@ class UserApp extends React.Component {
         if (usr.password === this.state.password) {
           this.setState(prevState => ({
             isLogged: !this.state.isLogged,
-            user: prevState.users.find(user => user.username === prevState.username), // ???
+            user: prevState.users.find(user => user.username === prevState.username), 
             username: '',
             password: '',
           }));
@@ -75,15 +76,15 @@ class UserApp extends React.Component {
   }
 
   handleBlocking(id) { //needs fixing
-    if (this.state.users[id].username !== 'admin') {
-      let users = this.state.users;
-      users[id].isBlocked = !users[id].isBlocked;
-      //this.state.users[id].isBlocked = !this.state.users[id].isBlocked;
-     /* this.setState(prevState => ({
-        users: [...users],
-        text: 'successfully blocked',
-      }));*/
-    }
+    console.warn(id);
+    if (id > 0) {
+        let users = this.state.users;
+        users[id].isBlocked = !users[id].isBlocked;
+        this.setState({
+          users: [...users]
+        })
+      };
+      return;
   }
 
   handleLogout() {
@@ -108,7 +109,12 @@ class UserApp extends React.Component {
       if (isRegistered) {
         return;
       }
-      const user = new User(this.state.users.length, this.state.username, this.state.password, false);
+      const user = {
+        id: this.state.users.length, 
+        username: this.state.username, 
+        password: this.state.password, 
+        isBlocked: false
+      };
       this.setState(prevState => ({
         users: [...prevState.users, user],
         username: '',
@@ -180,6 +186,11 @@ class UserApp extends React.Component {
             <div className="subtitle">
             Сожалеем, но вы были заблокированы администратором!
             </div>
+            <button className="button" onClick={this.handleLogout} >
+              <div className="contents">
+                Выйти
+              </div>
+            </button>
           </div>
         </div>
       );
@@ -237,20 +248,23 @@ class UserApp extends React.Component {
                   className="gridRow"
                   key={user.id}
                 >
-                <div>
-                  {user.id + 1}.
-                </div>
-                <div>
-                  {user.username} 
-                </div>
-                <div>
-                  {user.isBlocked ? '✓' : 'x'}
-                </div>
-                  <input
-                    type="checkbox"
-                    //onClick={this.handleBlocking(user.id)} // it gets called for each object that is created
-                    defaultChecked={this.state.users[user.id].isBlocked}
-                  />
+                  <div>
+                    {user.id + 1}.
+                  </div>
+                  <div>
+                    {user.username} 
+                  </div>
+                  <div>
+                    {user.isBlocked ? '✓' : 'x'}
+                  </div>
+                  <div>
+                    <input
+                      type="checkbox"
+                      onChange={() => this.handleBlocking(user.id)}
+                      // it gets called for each object that is created
+                      defaultChecked={user.isBlocked}
+                    />
+                  </div>
                 </div>
               ))}
             </div>
