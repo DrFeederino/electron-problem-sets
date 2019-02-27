@@ -4,17 +4,227 @@ import { remote } from 'electron';
 
 
 // To-Do:
-// 1. Offload most of the stuff to different components for better structure
-// 2. Testing - wip
-// 3. Styling - wip
+// 1. Refactor UserList component
+// 2. Iron out the chaning password behaviour - update user.password in users
+// 3. Add isSpecial row to UserList component
 
 const RU = {
   DEFAULT_WELCOME: 'Пожалуйста, авторизуйтесь!',
   INCORRECT_PASSWORD: 'Вы ввели неверный пароль!',
-  INCORRECT_PASSWORD_RETRY: 'Вы ввели неверный пароль! Количество оставшихся попыток ',
-  BANNED_ACCOUNT: 'Учетная запись заблокирована. Обратитесь к Администратору.',
-  PASSWORD_BAN: 'Вы были заблокированы, обратитесь к Администратору',
+  INCORRECT_PASSWORD_RETRY: 'Вы ввели неверный пароль!\n Количество оставшихся попыток ',
+  BANNED_ACCOUNT: 'Учетная запись заблокирована.\n Обратитесь к Администратору.',
+  PASSWORD_BAN: 'Вы были заблокированы,\n обратитесь к Администратору.',
   USER_NOT_FOUND: 'Пользователь в системе не найден!',
+  SPECIAL_PASSWORD: 'Введены ограничения на пароль.\n Обязательно наличие строчных и прописных букв,\n а также знаков препинания.',
+  REQUIREMENTS_NOT_MET: 'Условия на пароль не выполнены.',
+}
+
+const Text = (props) => {
+  return(
+    <div className={props.class}>
+      {props.text}
+    </div>);
+}
+
+const FieldBox = (props) => {
+  return(
+    <div className="outerIn">
+      <h5 className="inHeading">{props.fieldName}</h5>
+      <div className="inputWrapper">
+        <input
+          type={props.type}
+          id={props.fieldID}
+          className="inputDefault"
+          onChange={props.handler}
+          value={props.value}
+        />
+      </div>
+    </div>);
+}
+
+const AuthBlock = (props) => {
+  return(
+    <div className="authBlock">
+      <FieldBox
+        fieldName="имя пользователя"
+        fieldID="usernameIn"
+        handler={props.handleUsername}
+        value={props.username}
+        type="text"
+      />
+      <FieldBox
+        fieldName="пароль"
+        fieldID="passwordIn"
+        handler={props.handlePassword}
+        value={props.password}
+        type="password"
+      />
+      <Button text="Войти" />
+    </div>
+  );
+}
+
+const LoginWrapper = (props) => {
+  return(
+    <div className="wrapper">
+      <form className="authBox" onSubmit={props.handleLogin}>
+        <div className="centerWrapper">
+          <Text class="title" text="Добро пожаловать!" />
+          <Text class={props.text.includes("блок") ? "subtitle warning" : "subtitle"} text={props.text} />
+          <AuthBlock
+            username={props.username}
+            password={props.password}
+            handleUsername={props.handleUsername}
+            handlePassword={props.handlePassword}
+          />
+        </div>
+      </form>
+    </div>
+  );
+}
+
+const UserPanel = (props) => {
+  return(
+    <div className="wrapper">
+      <div className="wrapperLogged">
+        <Text class="title" text={"Добро пожаловать, " + props.username + "!"} />
+        <FieldBox
+          fieldName="пароль"
+          fieldID="passwordIn"
+          handler={props.handlePassword}
+          value={props.password}
+          type="password"
+        />
+        <Button
+          text="Сменить пароль"
+          hanlder={() => props.handleChangePassword(props.password, props.isSpecial)}
+        />
+        <Button
+          text="Выйти"
+          handler={props.handleLogout}
+        />
+      </div>
+    </div>
+  );
+}
+
+const UserList = (props) => {
+  return(
+    <div className="table">
+      <div className="gridColumn">
+        <div className="gridRow">
+          <div className="inHeading">
+            ID 
+          </div>
+          <div className="inHeading">
+            Имя пользователя
+          </div>
+          <div className="inHeading">
+            Заблокирован?
+          </div>
+          <div className="inHeading">
+            Заблокировать
+          </div>
+        </div>
+      </div>
+      <div className="gridColumn">
+        {props.users.map(user => (
+          <div
+            className="gridRow"
+            key={user.id}
+          >
+            <div className="inHeading">
+              {user.id + 1}.
+            </div>
+            <div className="inHeading">
+              {user.username} 
+            </div>
+            <div className="inHeading">
+              {user.isBlocked ? 'Да' : 'Нет'}
+            </div>
+            <div className="inHeading">
+              <input
+                className="inHeading"
+                type="checkbox"
+                onChange={() => props.handleBlocking(user.id)}
+                defaultChecked={user.isBlocked}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>);
+}
+
+const Button = (props) => {
+  return (
+    <button className="button" onClick={props.handler}>
+      <div className="contents">
+        {props.text}
+      </div>
+    </button>
+  );
+}
+
+const AddUser = (props) => {
+  return (
+    <div className="addFields">
+      <FieldBox
+        fieldName="имя пользователя"
+        fieldID="usernameIn"
+        handler={props.handleUsername}
+        value={props.username}
+        type="text"
+      />
+      <FieldBox
+        fieldName="пароль"
+        fieldID="passwordIn"
+        handler={props.handlePassword}
+        value={props.password}
+        type="text"
+      />
+      <div className="inHeading">
+          Специальный фильтр для пароля: 
+        <input
+          type="checkbox"
+          defaultChecked={props.isSpecial} // add onChange event behaviour
+        />
+      </div>
+      <Button
+        text="Добавить пользователя"
+        handler={props.handleAdding} 
+      />
+    </div>
+  );
+}
+
+const AdminPanel = (props) => {
+  return (
+    <div className="wrapper">
+      <div className="wrapperLogged">
+        <Text class="title" text={"Добро пожаловать, " + props.admin + "!"} />
+        <UserList 
+          users={props.users}
+          handleBlocking={props.handleBlocking} 
+        />
+        <AddUser
+          username={props.username}
+          password={props.password}
+          handleUsername={props.handleUsername}
+          handlePassword={props.handlePassword}
+          handleAdding={props.handleAdding}
+          isSpecial={props.isSpecial}
+        />
+        <Button
+          text="Сменить пароль"
+          handler={() => props.handleChangePassword(props.password, false)} // No requirements for Admin
+        />
+        <Button
+          text="Выйти"
+          handler={props.handleLogout}
+        />
+      </div>
+  </div>);
 }
 
 class UserApp extends React.Component {
@@ -27,6 +237,7 @@ class UserApp extends React.Component {
         password: 'admin',
         count: 0,
         isBlocked: false,
+        isSpecial: false,
       },
       {
         id: 1,
@@ -34,13 +245,14 @@ class UserApp extends React.Component {
         password: 'user',
         count: 0,
         isBlocked: true,
+        isSpecial: false,
       }],
       username: '', // these two fields are for adding or logging in
       password: '',
       isLogged: false,
       user: undefined, // handles currently logged in user
       text: RU['DEFAULT_WELCOME'],
-      isChecked: false,
+      isSpecial: false,
     };
     this.handleLogin = this.handleLogin.bind(this);
     this.handleUsername = this.handleUsername.bind(this);
@@ -58,15 +270,15 @@ class UserApp extends React.Component {
     for (let usr of this.state.users) {
       if (usr.username === this.state.username) {
         if (usr.password === this.state.password) {
-          if (usr.count < 3 && !this.checkIfBlocked(usr)) {
+          if (!this.checkIfBlocked(usr)) {
             this.setState(prevState => ({
               isLogged: !this.state.isLogged,
               user: prevState.users.find(user => user.username === prevState.username), 
               username: '',
               password: '',
-            }));
+            }));        
             const win = remote.getCurrentWindow();
-            win.setSize(600, 800);
+            win.setSize(600, 850);
             return;
           } else {
             this.setState({
@@ -100,12 +312,10 @@ class UserApp extends React.Component {
   }
 
   handleUsername(e) {
-    e.preventDefault();
     this.setState({ username: e.target.value });
   }
 
   handlePassword(e) {
-    e.preventDefault();
     this.setState({ password: e.target.value }); // add filter and number of tries support
   }
 
@@ -127,6 +337,8 @@ class UserApp extends React.Component {
     this.setState({
       isLogged: !this.state.isLogged,
       user: undefined,
+      username: '',
+      password: '',
       text: RU['DEFAULT_WELCOME'],
     });
     const win = remote.getCurrentWindow();
@@ -159,191 +371,81 @@ class UserApp extends React.Component {
         password: this.state.password,
         count: 0,
         isBlocked: false,
+        isSpecial: this.state.isSpecial,
       };
       this.setState(prevState => ({
         users: [...prevState.users, user],
         username: '',
         password: '',
+        isSpecial: false,
       }));
     }
+  }
+
+  handleChangePassword(pswrd, isSpecial) {
+    const re = /[А-Я]+[а-я]+[;,\.!\?\-:]+/;
+    console.warn('was invoked');
+    console.warn(pswrd);
+    console.warn(isSpecial);
+    if (isSpecial) {
+      if (!re.test(pswrd)) {
+        this.setState({
+          text: RU['REQUIREMENTS_NOT_MET'],
+          password: '',
+        });
+        return;
+      } else {
+        this.setState({
+          password: '', //oopsie
+        });
+        return;
+      }
+    }
+    if (!pswrd) {
+      this.setState({
+        password: '', //doopsie
+      })
+    }
+    return;
   }
 
   render() {
     // Render Logged in form for Admin and usual people
     if (!this.state.isLogged) {
       return (
-        <div className="wrapper">
-        <form className="authBox" onSubmit={this.handleLogin}>
-          <div className="centerWrapper">
-            <div className="title">
-            Добро пожаловать!
-            </div>
-            <div className="subtitle">
-              {this.state.text}
-            </div>
-            <div className="authBlock">
-              <div className="outerIn">
-                <h5 className="inHeading">имя пользователя</h5>
-                <div className="inputWrapper">
-                  <input
-                    type="text"
-                    name="имя пользователя"
-                    id="usernameIn"
-                    className="inputDefault"
-                    onChange={this.handleUsername}
-                    value={this.state.username}
-                  />
-                </div>
-              </div>
-              <div className="outerIn">
-                <h5 className="inHeading">пароль</h5>
-                <div className="inputWrapper">
-                  <input
-                    type="password"
-                    name="пароль"
-                    id="passwordIn"
-                    className="inputDefault"
-                    onChange={this.handlePassword}
-                    value={this.state.password}
-                  />
-                </div>
-              </div>
-              <button className="button">
-                <div
-                  className="contents"
-                >
-                  Войти
-                </div>
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
-      );
+      <LoginWrapper 
+        handleLogin={this.handleLogin}
+        text={this.state.text}
+        username={this.state.username}
+        password={this.state.password}
+        handleUsername={this.handleUsername}
+        handlePassword={this.handlePassword}
+      />);
     }
     if (this.state.user.id !== 0) {
       return (
-        <div className="wrapper">
-          <div className="userWrapper">
-            <div className='title'>
-              Добро Пожаловать, {this.state.user.username}!
-            </div>
-            <button className="button">
-              <div className="contents">
-                Сменить пароль
-              </div>
-            </button>
-            <button className="button" onClick={this.handleLogout} >
-              <div className="contents">
-                Выйти
-              </div>
-            </button>
-          </div>
-        </div>
-      );
-    } else {
-      return (
-        <div className="wrapper">
-          <div className="userWrapper">
-            <div className="centerWrapper">
-                <div className='title'>
-                  Добро пожаловать, {this.state.user.username}
-                </div>
-            </div>
-            <div className="table">
-              <div className="gridColumn">
-                <div className="gridRow">
-                  <div className="inHeading">
-                    ID 
-                  </div>
-                  <div className="inHeading">
-                    Имя пользователя
-                  </div>
-                  <div className="inHeading">
-                    Заблокирован?
-                  </div>
-                  <div className="inHeading">
-                    Заблокировать
-                  </div>
-                </div>
-              </div>
-              <div className="gridColumn">
-                {this.state.users.map(user => (
-                  <div
-                    className="gridRow"
-                    key={user.id}
-                  >
-                    <div className="inHeading">
-                      {user.id + 1}.
-                    </div>
-                    <div className="inHeading">
-                      {user.username} 
-                    </div>
-                    <div className="inHeading">
-                      {user.isBlocked ? 'Да' : 'Нет'}
-                    </div>
-                    <div className="inHeading">
-                      <input
-                        className="inHeading"
-                        type="checkbox"
-                        onChange={() => this.handleBlocking(user.id)}
-                        // it gets called for each object that is created
-                        defaultChecked={user.isBlocked}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="addFields">
-              <div className="outerIn">
-                  <h5 className="inHeading">имя пользователя</h5>
-                  <div className="inputWrapper">
-                    <input
-                      type="text"
-                      name="имя пользователя"
-                      id="usernameIn"
-                      className="inputDefault"
-                      onChange={this.handleUsername}
-                      value={this.state.username}
-                    />
-                  </div>
-                </div>
-                <div className="outerIn">
-                  <h5 className="inHeading">пароль</h5>
-                  <div className="inputWrapper">
-                    <input
-                      type="password"
-                      name="пароль"
-                      id="passwordIn"
-                      className="inputDefault"
-                      onChange={this.handlePassword}
-                      value={this.state.password}
-                    />
-                  </div>
-                </div>
-              <div className="inHeading">
-                  Специальный фильтр для пароля: 
-                <input
-                  type="checkbox"
-                  defaultChecked={this.state.isChecked} // add onChange event behaviour
-                />
-              </div>
-              <button className="button" onClick={this.handleAdding}>
-                <div className="contents">
-                  Добавить пользователя
-                </div>
-              </button>
-            </div>
-            <button className="button" onClick={this.handleLogout} >
-              <div className="contents">
-                Выйти
-              </div>
-            </button>
-          </div>
-        </div>
-      );
-    }
+        <UserPanel
+          username={this.state.user.username}
+          password={this.state.password}
+          isSpecial={this.state.user.isSpecial}
+          handlePassword={this.handlePassword}
+          handleChangePassword={this.handleChangePassword}
+          handleLogout={this.handleLogout}
+        />);
+    } else { return (
+        <AdminPanel
+          admin={this.state.user.username}
+          users={this.state.users}
+          handleBlocking={this.handleBlocking}
+          username={this.state.username}
+          password={this.state.password}
+          isSpecial={this.state.isSpecial}
+          handleUsername={this.handleUsername}
+          handlePassword={this.handlePassword}
+          handleAdding={this.handleAdding}
+          handleChangePassword={this.handleChangePassword}
+          handleLogout={this.handleLogout}
+        />);}
   }
 }
 
