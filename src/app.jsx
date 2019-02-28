@@ -5,7 +5,6 @@ import { remote } from 'electron';
 
 // To-Do:
 // 1. Refactor UserList component
-// 2. Iron out the chaning password behaviour - update user.password in users
 // 3. Add isSpecial row to UserList component
 
 const RU = {
@@ -17,17 +16,19 @@ const RU = {
   USER_NOT_FOUND: 'Пользователь в системе не найден!',
   SPECIAL_PASSWORD: 'Введены ограничения на пароль.\n Обязательно наличие строчных и прописных букв,\n а также знаков препинания.',
   REQUIREMENTS_NOT_MET: 'Условия на пароль не выполнены.',
+  PASSWORD_CHANGED: 'Пароль успешно изменён.',
+  PASSWORD_NOT_CHANGED: 'Пароль не был изменён.',
 }
 
 const Text = (props) => {
-  return(
+  return (
     <div className={props.class}>
       {props.text}
     </div>);
 }
 
 const FieldBox = (props) => {
-  return(
+  return (
     <div className="outerIn">
       <h5 className="inHeading">{props.fieldName}</h5>
       <div className="inputWrapper">
@@ -43,7 +44,7 @@ const FieldBox = (props) => {
 }
 
 const AuthBlock = (props) => {
-  return(
+  return (
     <div className="authBlock">
       <FieldBox
         fieldName="имя пользователя"
@@ -65,7 +66,7 @@ const AuthBlock = (props) => {
 }
 
 const LoginWrapper = (props) => {
-  return(
+  return (
     <div className="wrapper">
       <form className="authBox" onSubmit={props.handleLogin}>
         <div className="centerWrapper">
@@ -84,20 +85,21 @@ const LoginWrapper = (props) => {
 }
 
 const UserPanel = (props) => {
-  return(
+  return (
     <div className="wrapper">
       <div className="wrapperLogged">
-        <Text class="title" text={"Добро пожаловать, " + props.username + "!"} />
+        <Text class="title" text={"Добро пожаловать, " + props.user.username + "!"} />
+        <Text class="subtitle" text={props.text} />
         <FieldBox
           fieldName="пароль"
           fieldID="passwordIn"
-          handler={props.handlePassword}
           value={props.password}
+          handler={props.handlePassword}
           type="password"
         />
         <Button
           text="Сменить пароль"
-          hanlder={() => props.handleChangePassword(props.password, props.isSpecial)}
+          handler={() => props.handleChangePassword(props.user, props.password)}
         />
         <Button
           text="Выйти"
@@ -109,7 +111,7 @@ const UserPanel = (props) => {
 }
 
 const UserList = (props) => {
-  return(
+  return (
     <div className="table">
       <div className="gridColumn">
         <div className="gridRow">
@@ -202,7 +204,8 @@ const AdminPanel = (props) => {
   return (
     <div className="wrapper">
       <div className="wrapperLogged">
-        <Text class="title" text={"Добро пожаловать, " + props.admin + "!"} />
+        <Text class="title" text={"Добро пожаловать, " + props.admin.username + "!"} />
+        <Text class="subtitle" text={props.text} />
         <UserList 
           users={props.users}
           handleBlocking={props.handleBlocking} 
@@ -217,7 +220,7 @@ const AdminPanel = (props) => {
         />
         <Button
           text="Сменить пароль"
-          handler={() => props.handleChangePassword(props.password, false)} // No requirements for Admin
+          handler={() => props.handleChangePassword(props.admin, props.password)} // No requirements for Admin
         />
         <Button
           text="Выйти"
@@ -245,13 +248,13 @@ class UserApp extends React.Component {
         password: 'user',
         count: 0,
         isBlocked: true,
-        isSpecial: false,
+        isSpecial: true,
       }],
       username: '', // these two fields are for adding or logging in
       password: '',
       isLogged: false,
       user: undefined, // handles currently logged in user
-      text: RU['DEFAULT_WELCOME'],
+      text: RU.DEFAULT_WELCOME,
       isSpecial: false,
     };
     this.handleLogin = this.handleLogin.bind(this);
@@ -260,6 +263,7 @@ class UserApp extends React.Component {
     this.handleLogout = this.handleLogout.bind(this);
     this.handleAdding = this.handleAdding.bind(this);
     this.handleBlocking = this.handleBlocking.bind(this);
+    this.handleChangePassword = this.handleChangePassword.bind(this);
   }
 
   handleLogin(e) {
@@ -276,13 +280,14 @@ class UserApp extends React.Component {
               user: prevState.users.find(user => user.username === prevState.username), 
               username: '',
               password: '',
-            }));        
+              text: '',
+            }));
             const win = remote.getCurrentWindow();
             win.setSize(600, 850);
             return;
           } else {
             this.setState({
-              text: RU['BANNED_ACCOUNT'],
+              text: RU.BANNED_ACCOUNT,
             });
             return;
           }
@@ -293,21 +298,21 @@ class UserApp extends React.Component {
             users[usr.id].count++;
             this.setState({
               users: [...users],
-              text: RU['PASSWORD_BAN'],
+              text: RU.PASSWORD_BAN,
             });
             return;
           }
           users[usr.id].count++;
           this.setState({
             users: [...users],
-            text: usr.id > 0 ? RU['INCORRECT_PASSWORD_RETRY'] + (3 - users[usr.id].count) + '.' : RU['INCORRECT_PASSWORD'],
+            text: usr.id > 0 ? RU.INCORRECT_PASSWORD_RETRY + (3 - users[usr.id].count) + '.' : RU.INCORRECT_PASSWORD,
           });
           return;
         }
       }
     }
     this.setState({
-      text: RU['USER_NOT_FOUND'],
+      text: RU.USER_NOT_FOUND,
     });
   }
 
@@ -339,7 +344,7 @@ class UserApp extends React.Component {
       user: undefined,
       username: '',
       password: '',
-      text: RU['DEFAULT_WELCOME'],
+      text: RU.DEFAULT_WELCOME,
     });
     const win = remote.getCurrentWindow();
     win.setSize(500, 550);
@@ -382,30 +387,38 @@ class UserApp extends React.Component {
     }
   }
 
-  handleChangePassword(pswrd, isSpecial) {
+  handleChangePassword(user, password) {
     const re = /[А-Я]+[а-я]+[;,\.!\?\-:]+/;
-    console.warn('was invoked');
-    console.warn(pswrd);
-    console.warn(isSpecial);
-    if (isSpecial) {
-      if (!re.test(pswrd)) {
+    const users = this.state.users;
+    if (user.isSpecial) {
+      if (!re.test(password)) {
+        console.warn('this happened');
         this.setState({
-          text: RU['REQUIREMENTS_NOT_MET'],
+          text: RU.REQUIREMENTS_NOT_MET,
           password: '',
         });
         return;
       } else {
+        users[user.id].password = password;
         this.setState({
-          password: '', //oopsie
+          text: RU.PASSWORD_CHANGED,
+          password: '',
         });
         return;
       }
     }
-    if (!pswrd) {
+    if (password) {
+      users[user.id].password = password;
       this.setState({
+        text: RU.PASSWORD_CHANGED,
         password: '', //doopsie
-      })
+      });
+    } else {
+      this.setState({
+        text: RU.PASSWORD_NOT_CHANGED, 
+      });
     }
+    console.warn(this.state.users);
     return;
   }
 
@@ -413,29 +426,31 @@ class UserApp extends React.Component {
     // Render Logged in form for Admin and usual people
     if (!this.state.isLogged) {
       return (
-      <LoginWrapper 
-        handleLogin={this.handleLogin}
-        text={this.state.text}
-        username={this.state.username}
-        password={this.state.password}
-        handleUsername={this.handleUsername}
-        handlePassword={this.handlePassword}
-      />);
+        <LoginWrapper
+          handleLogin={this.handleLogin}
+          text={this.state.text}
+          username={this.state.username}
+          password={this.state.password}
+          handleUsername={this.handleUsername}
+          handlePassword={this.handlePassword}
+        />);
     }
     if (this.state.user.id !== 0) {
       return (
         <UserPanel
-          username={this.state.user.username}
+          user={this.state.user}
           password={this.state.password}
-          isSpecial={this.state.user.isSpecial}
+          text={this.state.text}
           handlePassword={this.handlePassword}
           handleChangePassword={this.handleChangePassword}
           handleLogout={this.handleLogout}
         />);
-    } else { return (
+    } else {
+      return (
         <AdminPanel
-          admin={this.state.user.username}
+          admin={this.state.user}
           users={this.state.users}
+          text={this.state.text}
           handleBlocking={this.handleBlocking}
           username={this.state.username}
           password={this.state.password}
@@ -445,7 +460,8 @@ class UserApp extends React.Component {
           handleAdding={this.handleAdding}
           handleChangePassword={this.handleChangePassword}
           handleLogout={this.handleLogout}
-        />);}
+        />);
+    }
   }
 }
 
