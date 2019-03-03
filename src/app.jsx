@@ -392,7 +392,6 @@ class UserApp extends React.Component {
     const users = this.state.users;
     if (user.isSpecial) {
       if (!re.test(password)) {
-        console.warn('this happened');
         this.setState({
           text: RU.REQUIREMENTS_NOT_MET,
           password: '',
@@ -418,7 +417,6 @@ class UserApp extends React.Component {
         text: RU.PASSWORD_NOT_CHANGED, 
       });
     }
-    console.warn(this.state.users);
     return;
   }
 
