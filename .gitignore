@@ -1,9 +1,9 @@
-node_modules
-out
-.eslintcache
+*/node_modules
+*/out
+*/.eslintcache
+*/.DS_Store
+*/.compilerc
+*/.eslintrc
+*/package-lock.json
+*/styles.css
 .DS_Store
-.compilerc
-.eslintrc
-package-lock.json
-styles.css
-

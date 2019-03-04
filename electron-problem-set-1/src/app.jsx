@@ -125,6 +125,9 @@ const UserList = (props) => {
             Заблокирован?
           </div>
           <div className="inHeading">
+            Особый пароль
+          </div>
+          <div className="inHeading">
             Заблокировать
           </div>
         </div>
@@ -143,6 +146,14 @@ const UserList = (props) => {
             </div>
             <div className="inHeading">
               {user.isBlocked ? 'Да' : 'Нет'}
+            </div>
+            <div className="inHeading">
+              <input
+                className="inHeading"
+                type="checkbox"
+                onChange={() => props.handleSpecificity(user.id)}
+                defaultChecked={user.isSpecial}
+              />
             </div>
             <div className="inHeading">
               <input
@@ -189,7 +200,8 @@ const AddUser = (props) => {
           Специальный фильтр для пароля: 
         <input
           type="checkbox"
-          defaultChecked={props.isSpecial} // add onChange event behaviour
+          defaultChecked={props.isSpecial}
+          onChange={() => props.handleSpecial()}
         />
       </div>
       <Button
@@ -208,7 +220,8 @@ const AdminPanel = (props) => {
         <Text class="subtitle" text={props.text} />
         <UserList 
           users={props.users}
-          handleBlocking={props.handleBlocking} 
+          handleBlocking={props.handleBlocking}
+          handleSpecificity={props.handleSpecificity}
         />
         <AddUser
           username={props.username}
@@ -217,6 +230,7 @@ const AdminPanel = (props) => {
           handlePassword={props.handlePassword}
           handleAdding={props.handleAdding}
           isSpecial={props.isSpecial}
+          handleSpecial={props.handleSpecial}
         />
         <Button
           text="Сменить пароль"
@@ -264,6 +278,8 @@ class UserApp extends React.Component {
     this.handleAdding = this.handleAdding.bind(this);
     this.handleBlocking = this.handleBlocking.bind(this);
     this.handleChangePassword = this.handleChangePassword.bind(this);
+    this.handleSpecificity = this.handleSpecificity.bind(this);
+    this.handleSpecial = this.handleSpecial.bind(this);
   }
 
   handleLogin(e) {
@@ -324,6 +340,11 @@ class UserApp extends React.Component {
     this.setState({ password: e.target.value }); // add filter and number of tries support
   }
 
+  handleSpecial() {
+    this.setState(prevState => ({
+      isSpecial: !prevState.isSpecial,
+    }));
+  }
   handleBlocking(id) {
     if (id > 0) {
       const users = this.state.users;
@@ -387,8 +408,13 @@ class UserApp extends React.Component {
     }
   }
 
+  handleSpecificity(id) {
+    const users = this.state.users;
+    users[id].isSpecial = !users[id].isSpecial;
+  }
+
   handleChangePassword(user, password) {
-    const re = /[А-Я]+[а-я]+[;,\.!\?\-:]+/;
+    const re = /[A-Z]+[a-z]+[;,\.!\?\-:]+/;
     const users = this.state.users;
     if (user.isSpecial) {
       if (!re.test(password)) {
@@ -458,6 +484,8 @@ class UserApp extends React.Component {
           handleAdding={this.handleAdding}
           handleChangePassword={this.handleChangePassword}
           handleLogout={this.handleLogout}
+          handleSpecificity={this.handleSpecificity}
+          handleSpecial={this.handleSpecial}
         />);
     }
   }
