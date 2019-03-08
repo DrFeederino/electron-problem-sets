@@ -1,11 +1,5 @@
 import React from 'react';
-import { Motion, spring } from 'react-motion';
 import { remote } from 'electron';
-
-
-// To-Do:
-// 1. Refactor UserList component
-// 3. Add isSpecial row to UserList component
 
 const RU = {
   DEFAULT_WELCOME: 'Пожалуйста, авторизуйтесь!',
@@ -109,63 +103,50 @@ const UserPanel = (props) => {
     </div>
   );
 }
+const TableRow = (props) => {
+  if (props.row.handler) {
+    return (
+      <div className="gridRow">
+        <input
+          className="inHeading"
+          type="checkbox"
+          onChange={props.row.handler}
+          defaultChecked={props.row.checked}
+        />
+      </div>);
+  }
+  return (
+    <div className="gridRow">
+      <div className="inHeading">
+        {props.row}
+      </div>
+    </div>);
+}
 
-const UserList = (props) => {
+const TableColumn = (props) => {
+  return (
+    <div className="gridColumn">
+      {props.columns.map(column => 
+        <TableRow row={column} key={props.columns.indexOf(column)} />
+      )}
+    </div>
+  );
+}
+
+const TableHeader = (props) => {
+  const header = ['ID', 'Имя пользователя', 'Заблокирован?', 'Особый пароль', 'Заблокировать'];
+  return (
+    <div className="gridColumn">
+      {header.map(column => <TableRow row={column} key={header.indexOf(column)}/>)}
+    </div>
+  );
+}
+
+const Table = (props) => {
   return (
     <div className="table">
-      <div className="gridColumn">
-        <div className="gridRow">
-          <div className="inHeading">
-            ID 
-          </div>
-          <div className="inHeading">
-            Имя пользователя
-          </div>
-          <div className="inHeading">
-            Заблокирован?
-          </div>
-          <div className="inHeading">
-            Особый пароль
-          </div>
-          <div className="inHeading">
-            Заблокировать
-          </div>
-        </div>
-      </div>
-      <div className="gridColumn">
-        {props.users.map(user => (
-          <div
-            className="gridRow"
-            key={user.id}
-          >
-            <div className="inHeading">
-              {user.id + 1}.
-            </div>
-            <div className="inHeading">
-              {user.username} 
-            </div>
-            <div className="inHeading">
-              {user.isBlocked ? 'Да' : 'Нет'}
-            </div>
-            <div className="inHeading">
-              <input
-                className="inHeading"
-                type="checkbox"
-                onChange={() => props.handleSpecificity(user.id)}
-                defaultChecked={user.isSpecial}
-              />
-            </div>
-            <div className="inHeading">
-              <input
-                className="inHeading"
-                type="checkbox"
-                onChange={() => props.handleBlocking(user.id)}
-                defaultChecked={user.isBlocked}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
+      <TableHeader />
+      {Object.keys(props.users).map(id => <TableColumn columns={props.users[id]} key={id}/>)}
     </div>);
 }
 
@@ -218,11 +199,7 @@ const AdminPanel = (props) => {
       <div className="wrapperLogged">
         <Text class="title" text={"Добро пожаловать, " + props.admin.username + "!"} />
         <Text class="subtitle" text={props.text} />
-        <UserList 
-          users={props.users}
-          handleBlocking={props.handleBlocking}
-          handleSpecificity={props.handleSpecificity}
-        />
+        <Table users={props.users} />
         <AddUser
           username={props.username}
           password={props.password}
@@ -282,18 +259,37 @@ class UserApp extends React.Component {
     this.handleSpecial = this.handleSpecial.bind(this);
   }
 
+  getUsers(){
+    let users = [];
+    this.state.users.map(user => {
+      users.push([
+        user.id + 1,
+        user.username,
+        user.isBlocked ? 'Да' : 'Нет',
+        {
+          checked: user.isSpecial,
+          handler: () => this.handleSpecificity(user.id)
+        },
+        {
+          checked: user.isBlocked,
+          handler: () => this.handleBlocking(user.id),
+        }]);
+    });
+    return users;
+  }
+
   handleLogin(e) {
     e.preventDefault();
     if (!this.state.username.length && !this.state.password) {
       return;
     }
-    for (let usr of this.state.users) {
-      if (usr.username === this.state.username) {
-        if (usr.password === this.state.password) {
-          if (!this.checkIfBlocked(usr)) {
+    for (let user of this.state.users) {
+      if (user.username === this.state.username) {
+        if (user.password === this.state.password) {
+          if (!user.isBlocked) {
             this.setState(prevState => ({
               isLogged: !this.state.isLogged,
-              user: prevState.users.find(user => user.username === prevState.username), 
+              user: user, 
               username: '',
               password: '',
               text: '',
@@ -308,20 +304,16 @@ class UserApp extends React.Component {
             return;
           }
         } else {
-          const users = this.state.users;
-          if (users[usr.id].count >= 3 && usr.id > 0) {
-            users[usr.id].isBlocked = true;
-            users[usr.id].count++;
+          ++user.count;
+          if (user.count >= 3 && user.id > 0) {
+            user.isBlocked = user.isBlocked ? true : !user.isBlocked;
             this.setState({
-              users: [...users],
               text: RU.PASSWORD_BAN,
             });
             return;
           }
-          users[usr.id].count++;
           this.setState({
-            users: [...users],
-            text: usr.id > 0 ? RU.INCORRECT_PASSWORD_RETRY + (3 - users[usr.id].count) + '.' : RU.INCORRECT_PASSWORD,
+            text: user.id > 0 ? RU.INCORRECT_PASSWORD_RETRY + (3 - user.count) + '.' : RU.INCORRECT_PASSWORD,
           });
           return;
         }
@@ -345,6 +337,7 @@ class UserApp extends React.Component {
       isSpecial: !prevState.isSpecial,
     }));
   }
+
   handleBlocking(id) {
     if (id > 0) {
       const users = this.state.users;
@@ -379,16 +372,13 @@ class UserApp extends React.Component {
     } return false;
   }
 
-  checkIfBlocked(user) {
-    if (user.isBlocked) {
-      return true;
-    } else { return false; }
-  }
-
   handleAdding() {
     if (this.state.username && this.state.password) {
       let isRegistered = this.checkUser();
       if (isRegistered) {
+        this.setState({
+          text: RU.USER_REGISTERED,
+        })
         return;
       }
       const user = {
@@ -404,6 +394,7 @@ class UserApp extends React.Component {
         username: '',
         password: '',
         isSpecial: false,
+        text: '',
       }));
     }
   }
@@ -470,10 +461,11 @@ class UserApp extends React.Component {
           handleLogout={this.handleLogout}
         />);
     } else {
+      let users = this.getUsers();
       return (
         <AdminPanel
           admin={this.state.user}
-          users={this.state.users}
+          users={users}
           text={this.state.text}
           handleBlocking={this.handleBlocking}
           username={this.state.username}
