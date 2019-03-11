@@ -15,6 +15,10 @@ const createWindow = async () => {
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
+    frame: true,
+    center: true,
+    closeable: true,
+    title:'Лабораторная работа 2',
   });
 
   // and load the index.html of the app.

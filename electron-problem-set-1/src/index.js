@@ -17,9 +17,6 @@ const createWindow = async () => {
     width: 500,
     frame: true,
     center: true,
-    show: false,
-    resizable: true,
-    maximazable: false,
     closeable: true,
     title:'Лабораторная работа 1',
   });
@@ -28,10 +25,13 @@ const createWindow = async () => {
   mainWindow.loadURL(`file://${__dirname}/index.html`);
 
   // Open the DevTools.
+  /*
+  Code is pretty much ready. DevMode is not required.
   if (isDevMode) {
     await installExtension(REACT_DEVELOPER_TOOLS);
     mainWindow.webContents.openDevTools();
   }
+  */
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {
