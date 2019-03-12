@@ -53,6 +53,7 @@ const Input = (props) => {
           type="number"
           value={props.value}
           onChange={(e) => props.handleValue(props.label, e.target.value, props.handler)}
+          min='0'
         />
       </div>
     </div>
@@ -127,33 +128,46 @@ class TaskApp extends React.Component {
       secondsInYear: 31536000, // 60 x 60 x 25 x 365
       handleTasks: {
         0: () => {
-          let stepOne = this.state.data.n ** this.state.data.k;
-          let stepTwo = (stepOne / this.state.data.s).toFixed(1);
-          let stepThree = stepTwo * this.state.data.v / this.state.data.m;
-          let result = (stepTwo + stepThree) / this.state.secondsInDay;
+          let {n, k, s, v, m} = this.state.data;
+          let stepOne = n ** k;
+          let stepTwo = (stepOne / s).toFixed(1);
+          let stepThree = stepTwo * v / m;
+          let daysStepTwo = stepTwo / this.state.secondsInDay;
+          let daysStepThree = stepThree / this.state.secondsInDay;
+          let result = Math.ceil(daysStepTwo + daysStepThree);
           const text = this.state.text;
-          text.passwords = `Количества вариантов паролей: C = nk = ${stepOne}.`;
-          text.time = `Время перебора всех паролей: t = C/s = ${stepTwo} сек ~ ${Math.ceil(stepTwo / this.state.secondsInDay)} дней.`
-          text.delayedTime = `С учётом пауз время перебора всех паролей: T = t×v/m = ${stepThree} сек ~ ${Math.ceil(stepThree / this.state.secondsInDay)} дней.`;
-          text.result = `Итоговое значение: Tитог = t+T = ${result} дня (дней).`;
+          text.passwords = `Количества вариантов паролей: \nC = nk = ${stepOne}.`;
+          text.time = `Время перебора всех паролей: \nt = C/s = ${stepTwo} сек ~ ${Math.ceil(daysStepTwo)} дней.`
+          text.delayedTime = `С учётом пауз время перебора всех паролей: \nT = t×v/m = ${stepThree} сек ~ ${Math.ceil(daysStepThree)} дней.`;
+          text.result = `Итоговое значение: \nTитог = t+T = ${result} дня (дней).`;
+          this.setState({
+            text: text,
+          })
         },
         1: () => {
-          let stepOne = this.state.data.t * this.state.data.s * this.state.secondsInYear;
+          let {t, s, n } = this.state.data;
+          let stepOne = t * s * this.state.secondsInYear;
           let stepTwo = Math.log10(stepOne).toFixed(1);
           let result = Math.ceil(stepTwo);
           const text = this.state.text;
-          text.alphabet = `Алфавит составляют символы: n = ${this.state.data.n}.`;
-          text.possibleNumber = `Определим количество вариантов: С = t×s = ${stepOne}.`;
-          text.passwordLength = `Длина пароля: k = lg C = ${stepTwo}.`;
+          text.alphabet = `Алфавит составляют символы: \nn = ${n}.`;
+          text.possibleNumber = `Определим количество вариантов: \nС = t×s = ${stepOne}.`;
+          text.passwordLength = `Длина пароля: \nk = lg C = ${stepTwo}.`;
           text.result = `Длина пароля должна быть не менее  символов ${result}.`;
+          this.setState({
+            text: text,
+          })
         },
         2: () => {
-          let { s, t, k} =  this.state.data;
+          let {s, t, k} =  this.state.data;
           let stepOne = ((t * s * this.state.secondsInYear) ** ( 1 / k)).toFixed(1);
           let result = Math.ceil(stepOne);
           const text = this.state.text;
-          text.possibleNumber = `Количества вариантов паролей: C = k√t×s = ${stepOne}.`;
+          text.possibleNumber = `Количества вариантов паролей: \nC = k√t×s = ${stepOne}.`;
           text.result = `Количество символов алфавита должно быть не меньше ${result}.`;
+          this.setState({
+            text: text,
+          })
         }
       }
     };
