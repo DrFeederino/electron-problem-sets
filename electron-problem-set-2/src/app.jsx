@@ -1,14 +1,10 @@
 import React from 'react';
 
-/* TO DO:
-  1. Styling
-  2. Resolve handlers for each exercise
-*/
 
 const Task = (props) => {
   return (
     <div className="userWrapper">
-      <Text className="title" text={props.givenTask.id} />
+      <Text class={'description'} text={props.givenTask.id} />
       <div>
         {props.description}
       </div>
@@ -29,7 +25,7 @@ const TaskResultText = (props) => {
   return (
     <div className={props.class}>
       {Object.keys(props.text).map(element => (
-        <div key={element}>
+        <div key={element} className={props.subclass}>
           {props.text[element]}
         </div>))}
     </div>
@@ -49,9 +45,16 @@ const Description = (props) => {
 
 const Input = (props) => {
   return(
-    <div>
-      <label>{props.label}</label>
-      <input type="number" value={props.value} onChange={(e) => props.handleValue(props.label, e.target.value, props.handler)} />
+    <div className="inputDiv">
+      <label className="inputLabel">{props.label}</label>
+      <div className="inputWrapper">
+        <input
+          className="inputTag"
+          type="number"
+          value={props.value}
+          onChange={(e) => props.handleValue(props.label, e.target.value, props.handler)}
+        />
+      </div>
     </div>
    );
 }
@@ -68,10 +71,10 @@ const Tasks = [
     },
     text: {
       description: `Определить время перебора всех паролей с параметрами`,
-      passwords: `Количества вариантов паролей: C = nk = `,
-      time: `Время перебора всех паролей: t = C/s = `,
-      delayedTime: `С учётом пауз время перебора всех паролей: T = t×v/m = `,
-      total: `Итоговое значение: Tитог = t+T = `
+      passwords: ``,
+      time: ``,
+      delayedTime: ``,
+      result: ``
     },
   },
   {
@@ -82,11 +85,11 @@ const Tasks = [
     s: 200,
     },
     text: {
-      description: `Определить минимальную длину пароля ,состоящего из 150 символов и время перебора которого не меньше 30 лет`,
-      alphabet: `Алфавит составляют символы: n = `,
-      possibleNumber: `Определим количество вариантов: С = t×s = `,
-      passwordLength: `Длина пароля: k = lg C= `,
-      calculated: `Длина пароля должна быть не менее  символов`,
+      description: `Определить минимальную длину пароля, состоящего из 150 символов и время перебора которого не меньше 30 лет.`,
+      alphabet: ``,
+      possibleNumber: ``,
+      passwordLength: ``,
+      result: ``,
     },
   },
   {
@@ -97,9 +100,9 @@ const Tasks = [
       s: 200,
     },
     text: {
-      description: `Определить количество символов алфавита n ,пароль состоит из 6 символов,время перебора не меньше 30 лет`,
-      possibleNumber: `Количества вариантов паролей: C = k√t×s = `,
-      calculated: `Количество символов алфавита должно быть не меньше `,
+      description: `Определить количество символов алфавита n ,пароль состоит из 6 символов,время перебора не меньше 30 лет.`,
+      possibleNumber: ``,
+      result: ``,
     },
   },
 ];
@@ -125,31 +128,32 @@ class TaskApp extends React.Component {
       handleTasks: {
         0: () => {
           let stepOne = this.state.data.n ** this.state.data.k;
-          let stepTwo = stepOne / this.state.data.s;
+          let stepTwo = (stepOne / this.state.data.s).toFixed(1);
           let stepThree = stepTwo * this.state.data.v / this.state.data.m;
           let result = (stepTwo + stepThree) / this.state.secondsInDay;
-          this.setState(prevState => ({
-            text: {
-              description: prevState.text.description,
-              passwords: prevState.text.passwords + `${stepOne}`,
-              time: prevState.text.time + `${stepTwo} сек ~ ${Math.ceil(stepTwo / this.state.secondsInDay)} дней` ,
-              delayedTime: prevState.text.time + `${stepThree} сек ~ ${Math.ceil(stepThree / this.state.secondsInDay)} дней`,
-              total: prevState.text.total + `${result} дня (дней)`,
-            }
-          }));
+          const text = this.state.text;
+          text.passwords = `Количества вариантов паролей: C = nk = ${stepOne}.`;
+          text.time = `Время перебора всех паролей: t = C/s = ${stepTwo} сек ~ ${Math.ceil(stepTwo / this.state.secondsInDay)} дней.`
+          text.delayedTime = `С учётом пауз время перебора всех паролей: T = t×v/m = ${stepThree} сек ~ ${Math.ceil(stepThree / this.state.secondsInDay)} дней.`;
+          text.result = `Итоговое значение: Tитог = t+T = ${result} дня (дней).`;
         },
         1: () => {
-          let stepOne = this.state.t * this.state.s * this.state.secondsInYear;
-          let stepTwo = Math.log10(stepOne);
+          let stepOne = this.state.data.t * this.state.data.s * this.state.secondsInYear;
+          let stepTwo = Math.log10(stepOne).toFixed(1);
           let result = Math.ceil(stepTwo);
           const text = this.state.text;
-          text.alphabet += `${this.state.n}`;
-          text.possibleNumber += `${stepOne}`;
-          text.passwordLength += `${stepTwo}`;
-          text.calculated += `${result}`;
+          text.alphabet = `Алфавит составляют символы: n = ${this.state.data.n}.`;
+          text.possibleNumber = `Определим количество вариантов: С = t×s = ${stepOne}.`;
+          text.passwordLength = `Длина пароля: k = lg C = ${stepTwo}.`;
+          text.result = `Длина пароля должна быть не менее  символов ${result}.`;
         },
         2: () => {
-          return;
+          let { s, t, k} =  this.state.data;
+          let stepOne = ((t * s * this.state.secondsInYear) ** ( 1 / k)).toFixed(1);
+          let result = Math.ceil(stepOne);
+          const text = this.state.text;
+          text.possibleNumber = `Количества вариантов паролей: C = k√t×s = ${stepOne}.`;
+          text.result = `Количество символов алфавита должно быть не меньше ${result}.`;
         }
       }
     };
@@ -157,15 +161,19 @@ class TaskApp extends React.Component {
   }
 
   handleValue(target, value, handler) {
-    const data = this.state.data;
+    let data = this.state.data;
     data[target] = Number(value);
+    this.setState({
+      data: data,
+    })
     handler();
   }
 
   render() {
-    return(
+    let formulas = Object.values(this.state.text).slice(1);
+    return (
       <div className="taskWrapper">
-        <Text className="subtitle" text={this.state.text.description} />
+        <Text class={'title'} text={this.state.text.description} />
         {Object.keys(this.state.data).map(element => (
           <Input
             key={element}
@@ -174,7 +182,7 @@ class TaskApp extends React.Component {
             handleValue={this.handleValue}
             handler={this.state.handleTasks[this.state.id]}
           />))}
-      <TaskResultText className="subtitle" text={this.state.text} />
+      <TaskResultText class={'subtitle'} subclass={'contents'} text={formulas} />
       </div>);
   }
 }
