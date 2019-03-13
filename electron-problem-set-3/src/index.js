@@ -13,25 +13,22 @@ if (isDevMode) enableLiveReload({ strategy: 'react-hmr' });
 const createWindow = async () => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    height: 550,
-    width: 500,
+    width: 800,
+    height: 600,
     frame: true,
     center: true,
     closeable: true,
-    title: 'Лабораторная работа 1',
+    title: 'Лабораторная работа 3',
   });
 
   // and load the index.html of the app.
   mainWindow.loadURL(`file://${__dirname}/index.html`);
 
   // Open the DevTools.
-  /*
-  Code is pretty much ready. DevMode is not required.
   if (isDevMode) {
     await installExtension(REACT_DEVELOPER_TOOLS);
     mainWindow.webContents.openDevTools();
   }
-  */
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {
@@ -40,7 +37,6 @@ const createWindow = async () => {
     // when you should delete the corresponding element.
     mainWindow = null;
   });
-  mainWindow.once('ready-to-show', () => mainWindow.show());
 };
 
 // This method will be called when Electron has finished

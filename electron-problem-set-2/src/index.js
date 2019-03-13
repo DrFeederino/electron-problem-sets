@@ -18,7 +18,7 @@ const createWindow = async () => {
     frame: true,
     center: true,
     closeable: true,
-    title:'Лабораторная работа 2',
+    title: 'Лабораторная работа 2',
   });
 
   // and load the index.html of the app.

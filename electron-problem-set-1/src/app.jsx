@@ -14,95 +14,88 @@ const RU = {
   PASSWORD_NOT_CHANGED: 'Пароль не был изменён.',
 }
 
-const Text = (props) => {
-  return (
-    <div className={props.class}>
-      {props.text}
-    </div>);
-}
+const Text = (props) => (
+  <div className={props.class}>
+    {props.text}
+  </div>
+);
 
-const FieldBox = (props) => {
-  return (
-    <div className="outerIn">
-      <h5 className="inHeading">{props.fieldName}</h5>
-      <div className="inputWrapper">
-        <input
-          type={props.type}
-          id={props.fieldID}
-          className="inputDefault"
-          onChange={props.handler}
-          value={props.value}
+const FieldBox = (props) => (
+  <div className="outerIn">
+    <h5 className="inHeading">{props.fieldName}</h5>
+    <div className="inputWrapper">
+      <input
+        type={props.type}
+        id={props.fieldID}
+        className="inputDefault"
+        onChange={props.handler}
+        value={props.value}
+      />
+    </div>
+  </div>
+);
+
+const AuthBlock = (props) => (
+  <div className="authBlock">
+    <FieldBox
+      fieldName="имя пользователя"
+      fieldID="usernameIn"
+      handler={props.handleUsername}
+      value={props.username}
+      type="text"
+    />
+    <FieldBox
+      fieldName="пароль"
+      fieldID="passwordIn"
+      handler={props.handlePassword}
+      value={props.password}
+      type="password"
+    />
+    <Button text="Войти" />
+  </div>
+);
+
+const LoginWrapper = (props) => (
+  <div className="wrapper">
+    <form className="authBox" onSubmit={props.handleLogin}>
+      <div className="centerWrapper">
+        <Text class="title" text="Добро пожаловать!" />
+        <Text class={props.text.includes("блок") ? "subtitle warning" : "subtitle"} text={props.text} />
+        <AuthBlock
+          username={props.username}
+          password={props.password}
+          handleUsername={props.handleUsername}
+          handlePassword={props.handlePassword}
         />
       </div>
-    </div>);
-}
+    </form>
+  </div>
+);
 
-const AuthBlock = (props) => {
-  return (
-    <div className="authBlock">
-      <FieldBox
-        fieldName="имя пользователя"
-        fieldID="usernameIn"
-        handler={props.handleUsername}
-        value={props.username}
-        type="text"
-      />
+const UserPanel = (props) => (
+  <div className="wrapper">
+    <div className="wrapperLogged">
+      <Text class="title" text={"Добро пожаловать, " + props.user.username + "!"} />
+      <Text class="subtitle" text={props.text} />
       <FieldBox
         fieldName="пароль"
         fieldID="passwordIn"
-        handler={props.handlePassword}
         value={props.password}
+        handler={props.handlePassword}
         type="password"
       />
-      <Button text="Войти" />
+      <Button
+        text="Сменить пароль"
+        handler={() => props.handleChangePassword(props.user, props.password)}
+      />
+      <Button
+        text="Выйти"
+        handler={props.handleLogout}
+      />
     </div>
-  );
-}
+  </div>
+);
 
-const LoginWrapper = (props) => {
-  return (
-    <div className="wrapper">
-      <form className="authBox" onSubmit={props.handleLogin}>
-        <div className="centerWrapper">
-          <Text class="title" text="Добро пожаловать!" />
-          <Text class={props.text.includes("блок") ? "subtitle warning" : "subtitle"} text={props.text} />
-          <AuthBlock
-            username={props.username}
-            password={props.password}
-            handleUsername={props.handleUsername}
-            handlePassword={props.handlePassword}
-          />
-        </div>
-      </form>
-    </div>
-  );
-}
-
-const UserPanel = (props) => {
-  return (
-    <div className="wrapper">
-      <div className="wrapperLogged">
-        <Text class="title" text={"Добро пожаловать, " + props.user.username + "!"} />
-        <Text class="subtitle" text={props.text} />
-        <FieldBox
-          fieldName="пароль"
-          fieldID="passwordIn"
-          value={props.password}
-          handler={props.handlePassword}
-          type="password"
-        />
-        <Button
-          text="Сменить пароль"
-          handler={() => props.handleChangePassword(props.user, props.password)}
-        />
-        <Button
-          text="Выйти"
-          handler={props.handleLogout}
-        />
-      </div>
-    </div>
-  );
-}
 const TableRow = (props) => {
   if (props.row.handler) {
     return (
@@ -123,15 +116,13 @@ const TableRow = (props) => {
     </div>);
 }
 
-const TableColumn = (props) => {
-  return (
-    <div className="gridColumn">
-      {props.columns.map(column => 
-        <TableRow row={column} key={props.columns.indexOf(column)} />
-      )}
-    </div>
-  );
-}
+const TableColumn = (props) => (
+  <div className="gridColumn">
+    {props.columns.map(column => 
+      <TableRow row={column} key={props.columns.indexOf(column)} />
+    )}
+  </div>
+);
 
 const TableHeader = (props) => {
   const header = ['ID', 'Имя пользователя', 'Заблокирован?', 'Особый пароль', 'Заблокировать'];
@@ -142,84 +133,78 @@ const TableHeader = (props) => {
   );
 }
 
-const Table = (props) => {
-  return (
-    <div className="table">
-      <TableHeader />
-      {Object.keys(props.users).map(id => <TableColumn columns={props.users[id]} key={id}/>)}
-    </div>);
-}
+const Table = (props) => (
+  <div className="table">
+    <TableHeader />
+    {Object.keys(props.users).map(id => <TableColumn columns={props.users[id]} key={id}/>)}
+  </div>
+);
 
-const Button = (props) => {
-  return (
-    <button className="button" onClick={props.handler}>
-      <div className="contents">
-        {props.text}
-      </div>
-    </button>
-  );
-}
+const Button = (props) => (
+  <button className="button" onClick={props.handler}>
+    <div className="contents">
+      {props.text}
+    </div>
+  </button>
+);
 
-const AddUser = (props) => {
-  return (
-    <div className="addFields">
-      <FieldBox
-        fieldName="имя пользователя"
-        fieldID="usernameIn"
-        handler={props.handleUsername}
-        value={props.username}
-        type="text"
-      />
-      <FieldBox
-        fieldName="пароль"
-        fieldID="passwordIn"
-        handler={props.handlePassword}
-        value={props.password}
-        type="text"
-      />
-      <div className="inHeading">
-          Специальный фильтр для пароля: 
-        <input
-          type="checkbox"
-          defaultChecked={props.isSpecial}
-          onChange={() => props.handleSpecial()}
-        />
-      </div>
-      <Button
-        text="Добавить пользователя"
-        handler={props.handleAdding} 
+const AddUser = (props) => (
+  <div className="addFields">
+    <FieldBox
+      fieldName="имя пользователя"
+      fieldID="usernameIn"
+      handler={props.handleUsername}
+      value={props.username}
+      type="text"
+    />
+    <FieldBox
+      fieldName="пароль"
+      fieldID="passwordIn"
+      handler={props.handlePassword}
+      value={props.password}
+      type="text"
+    />
+    <div className="inHeading">
+        Специальный фильтр для пароля: 
+      <input
+        type="checkbox"
+        defaultChecked={props.isSpecial}
+        onChange={() => props.handleSpecial()}
       />
     </div>
-  );
-}
+    <Button
+      text="Добавить пользователя"
+      handler={props.handleAdding} 
+    />
+  </div>
+);
 
-const AdminPanel = (props) => {
-  return (
-    <div className="wrapper">
-      <div className="wrapperLogged">
-        <Text class="title" text={"Добро пожаловать, " + props.admin.username + "!"} />
-        <Text class="subtitle" text={props.text} />
-        <Table users={props.users} />
-        <AddUser
-          username={props.username}
-          password={props.password}
-          handleUsername={props.handleUsername}
-          handlePassword={props.handlePassword}
-          handleAdding={props.handleAdding}
-          isSpecial={props.isSpecial}
-          handleSpecial={props.handleSpecial}
-        />
-        <Button
-          text="Сменить пароль"
-          handler={() => props.handleChangePassword(props.admin, props.password)} // No requirements for Admin
-        />
-        <Button
-          text="Выйти"
-          handler={props.handleLogout}
-        />
-      </div>
-  </div>);
-}
+const AdminPanel = (props) => (
+  <div className="wrapper">
+    <div className="wrapperLogged">
+      <Text class="title" text={"Добро пожаловать, " + props.admin.username + "!"} />
+      <Text class="subtitle" text={props.text} />
+      <Table users={props.users} />
+      <AddUser
+        username={props.username}
+        password={props.password}
+        handleUsername={props.handleUsername}
+        handlePassword={props.handlePassword}
+        handleAdding={props.handleAdding}
+        isSpecial={props.isSpecial}
+        handleSpecial={props.handleSpecial}
+      />
+      <Button
+        text="Сменить пароль"
+        handler={() => props.handleChangePassword(props.admin, props.password)} // No requirements for Admin
+      />
+      <Button
+        text="Выйти"
+        handler={props.handleLogout}
+      />
+    </div>
+</div>
+);
 
 class UserApp extends React.Component {
   constructor(props) {

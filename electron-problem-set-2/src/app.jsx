@@ -1,64 +1,56 @@
 import React from 'react';
 
 
-const Task = (props) => {
-  return (
-    <div className="userWrapper">
-      <Text class={'description'} text={props.givenTask.id} />
-      <div>
-        {props.description}
-      </div>
-      <div>
-      </div>
+const Task = (props) => (
+  <div className="userWrapper">
+    <Text class={'description'} text={props.givenTask.id} />
+    <div>
+      {props.description}
     </div>
-  );
-};
-
-const Text = (props) => {
-  return (
-    <div className={props.class}>
-      {props.text}
-    </div>);
-};
-
-const TaskResultText = (props) => {
-  return (
-    <div className={props.class}>
-      {Object.keys(props.text).map(element => (
-        <div key={element} className={props.subclass}>
-          {props.text[element]}
-        </div>))}
+    <div>
     </div>
-  );
-}
+  </div>
+);
 
-const Description = (props) => {
-  return (
-    <div className={props.class}>
-      {Object.keys(props.text).map(element => (
-        <div key={element}>
-          {element} - {props.text[element]}
-        </div>))}
-    </div>
-  );
-}
+const Text = (props) => (
+  <div className={props.class}>
+    {props.text}
+  </div>
+);
 
-const Input = (props) => {
-  return(
-    <div className="inputDiv">
-      <label className="inputLabel">{props.label}</label>
-      <div className="inputWrapper">
-        <input
-          className="inputTag"
-          type="number"
-          value={props.value}
-          onChange={(e) => props.handleValue(props.label, e.target.value, props.handler)}
-          min='0'
-        />
-      </div>
+const TaskResultText = (props) => (
+  <div className={props.class}>
+    {Object.keys(props.text).map(element => (
+      <div key={element} className={props.subclass}>
+        {props.text[element]}
+      </div>))}
+  </div>
+);
+
+const Description = (props) => (
+  <div className={props.class}>
+    {Object.keys(props.text).map(element => (
+      <div key={element}>
+        {element} - {props.text[element]}
+      </div>))}
+  </div>
+);
+
+const Input = (props) => (
+  <div className="inputDiv">
+    <label className="inputLabel">{props.label}</label>
+    <div className="inputWrapper">
+      <input
+        className="inputTag"
+        type="number"
+        value={props.value}
+        onChange={(e) => props.handleValue(props.label, e.target.value, props.handler)}
+        min='0'
+      />
     </div>
-   );
-}
+  </div>
+);
+
 
 const Tasks = [
   {
