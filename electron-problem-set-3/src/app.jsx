@@ -1,16 +1,5 @@
 import React from 'react';
 
-const Task = (props) => (
-    <div className="userWrapper">
-      <Text class={'description'} text={props.givenTask.id} />
-      <div>
-        {props.description}
-      </div>
-      <div>
-      </div>
-    </div>
-);
-
 const Text = (props) => (
   <div className={props.class}>
     {props.text}
