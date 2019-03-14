@@ -5,4 +5,4 @@ Login form for admin and a user with simple basic functions like adding new user
 # electron-problem-set-2
 Handling calculations for given data.
 # electron-problem-set-3
-TBC
+Generating ASCII-based password for given data.
