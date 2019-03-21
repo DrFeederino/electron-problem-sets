@@ -6,3 +6,5 @@ Login form for admin and a user with simple basic functions like adding new user
 Handling calculations for given data.
 # electron-problem-set-3
 Generating ASCII-based password for given data.
+# electron-problem-set-4
+The task is to make a discretionary access control with 7 users and 4 accessing objects.

@@ -125,7 +125,7 @@ class TaskApp extends React.Component {
     data[target] = Number(value);
     this.setState({
       data: data,
-    })
+    });
     handler();
   }
 
@@ -142,7 +142,7 @@ class TaskApp extends React.Component {
             handleValue={this.handleValue}
             handler={this.state.handleTasks[this.state.id]}
           />))}
-      <TaskResultText class={'subtitle'} subclass={'contents'} text={formulas} />
+        <TaskResultText class={'subtitle'} subclass={'contents'} text={formulas} />
       </div>);
   }
 }
