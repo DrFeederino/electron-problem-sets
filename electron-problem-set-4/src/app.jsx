@@ -5,7 +5,7 @@ const NUMBER_OF_OBJECTS = 4;
 const UserNames = ['Admin', 'Andrey', 'Boris', 'Vladimir', 'Gennady', 'Dmitri', 'Evgeny'];
 const NUMBER_OF_USERS = UserNames.length;
 const RU = { // object with russian locale
-  DEFAULT_WELCOME: 'Добро пожаловать в дискреционную модель!',
+  DEFAULT_WELCOME: 'Добро пожаловать в дискреционную модель ПБ!',
   USER_NOT_FOUND: 'Пользователь в системе не найден!',
   REQUIREMENTS_NOT_MET: 'Условия на пароль не выполнены.',
   READ: 'Чтение',
@@ -88,17 +88,21 @@ const initUsers = () => {
 };
 
 const FieldBox = (props) => (
-  <div className="outerIn">
-    <h5 className="inHeading">{props.fieldName}</h5>
+  <div className="wrappingDiv">
+    <h5 className="textHeader">{props.fieldName}</h5>
     <div className="inputWrapper">
       <input
         type={props.type}
-        id={props.fieldID}
         className="inputDefault"
         onChange={props.handler}
         value={props.value}
       />
+      <Button
+        text={props.text}
+        handler={props.handleButton}
+      />
     </div>
+
   </div>
 );
 
@@ -121,7 +125,7 @@ const Text = (props) => {
 
 const TableRow = (props) => (
   <div className="gridRow">
-    <Text class={'inHeading'} text={props.row} />
+    <Text class={'textHeader'} text={props.row} />
   </div>
 );
 
@@ -154,50 +158,29 @@ const TableComponent = (props) => (
 
 const IDComponent = (props) => {
   return (
-    <div>
+    <div className="IDComponentWrapper">
+      <TableComponent users={props.users} />
       <FieldBox
         fieldName={RU.USERNAME}
-        fieldID="usernameIn"
         handler={props.handler}
         value={props.value}
         type="type"
-      />
-      <Button
         text={props.isLogged ? RU.LOGOUT : RU.LOGIN}
-        handler={props.handleID}
+        handleButton={props.handleLogin}
       />
     </div>
   );
 };
 
-const SelectorComponent = (props) => {
-  if (props.permission === 'TRANSFER') {
-    return (
-      <div>
-        <label htmlFor={props.kind}>{props.text}</label>
-        <select id="props.kind" onChange={props.handleOption}>
-          <option value="" disabled>{RU.SELECT_DEFAULT}</option>
-          {props.arr.map(item => <option key={item} value={item}>{item}</option>)}
-        </select>
-        <label htmlFor="target-selector">{RU.SELECT_USER}</label>
-        <select id="target-selector" onChange={props.handleUser}>
-          <option value="" disabled>{RU.SELECT_DEFAULT}</option>
-          {UserNames.map(item => <option key={item} value={item}>{item}</option>)}
-        </select>
-      </div>
-    );
-  } else {
-    return (
-      <div>
-        <label htmlFor={props.kind}>{props.text}</label>
-        <select id="props.kind" onChange={props.handleOption}>
-          <option value="" disabled>{RU.SELECT_DEFAULT}</option>
-          {props.arr.map(item => <option key={item} value={item}>{item}</option>)}
-        </select>
-      </div>
-    );
-  }
-};
+const SelectorComponent = (props) => (
+  <div className="SelectorWrapper">
+    <label className="textHeader" htmlFor={props.kind}>{props.text}</label>
+    <select id="props.kind" onChange={props.handleOption}>
+      <option value="" disabled>{RU.SELECT_DEFAULT}</option>
+      {props.arr.map(item => <option key={item} value={item}>{item}</option>)}
+    </select>
+  </div>
+);
 
 const PermissionComponent = (props) => {
   const ObjectsText = [];
@@ -210,16 +193,22 @@ const PermissionComponent = (props) => {
   }
   if (props.isLogged) {
     return (
-      <div>
+      <div className="PermissionWrapper">
         <Text text={props.username} />
         <SelectorComponent
           kind="permission-selector"
           arr={PermissionsText}
           text={RU.CHOOSE_PERMISSION}
           handleOption={props.handleOptionPermission}
-          permission={props.permission}
-          handleUser={props.handleUser}
         />
+        {props.permission === 'TRANSFER' &&
+          <SelectorComponent
+            kind="user-selector"
+            arr={UserNames}
+            text={RU.SELECT_USER}
+            handleOption={props.handleUser}
+          />
+        }
         <SelectorComponent
           kind="object-selection"
           arr={ObjectsText}
@@ -232,7 +221,7 @@ const PermissionComponent = (props) => {
         />
       </div>
     );
-  } else { return (<Text text={RU.PROCEED_LOGIN} />); }
+  } else { return (<Text class="title" text={RU.PROCEED_LOGIN} />); }
 };
 
 class DACApp extends React.Component {
@@ -335,17 +324,16 @@ class DACApp extends React.Component {
 
   render() {
     return (
-      <div className="wrapper">
-        <Text text={RU.DEFAULT_WELCOME} />
-        <Text text={this.state.text} />
-        <TableComponent users={this.state.users} />
+      <div className="DACWrapper">
+        <Text class="title" text={RU.DEFAULT_WELCOME} />
         <IDComponent
           users={this.state.users}
-          handleID={this.handleIdentifcation}
+          handleLogin={this.handleIdentifcation}
           value={this.state.username}
           handler={this.handleUsername}
           isLogged={this.state.isLogged}
         />
+        <Text class="title" text={this.state.text} />
         <PermissionComponent
           users={this.state.users}
           handlePermissions={this.handlePermissions}
