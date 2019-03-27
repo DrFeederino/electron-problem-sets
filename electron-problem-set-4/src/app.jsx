@@ -1,9 +1,6 @@
 import React from 'react';
-/*
-  To-Do:
-  1. UUID for keys
-  2. Implement look and styles
-*/
+import uniqid from 'uniqid';
+
 const NUMBER_OF_OBJECTS = 4;
 const UserNames = ['Admin', 'Andrey', 'Boris', 'Vladimir', 'Gennady', 'Dmitri', 'Evgeny'];
 const NUMBER_OF_USERS = UserNames.length;
@@ -28,6 +25,8 @@ const RU = { // object with russian locale
   SUCCESSFUL_OPERATION: 'Операция выполнена успешно.',
   UNSUCCESSFUL_OPERATION: 'В доступе отказано.',
   SELECT_USER: 'Выберите пользователя: ',
+  UNSUCCESSFUL_OPERATION_SAME_USER: 'Невозможно переназначить себе права.',
+  UNSUCCESSFUL_OPERATION_ADMIN: 'Невозможно назначить права администратору.',
   translateText(text) {
     if (!text) {
       return;
@@ -43,7 +42,7 @@ const RU = { // object with russian locale
       translatedText += ', ';
     }
     return translatedText.slice(0, translatedText.length - 2);
-  }
+  },
 };
 
 const UserObject = (name, permissions) => ({ name: name, permissions: permissions });
@@ -132,7 +131,7 @@ const TableColumn = (props) => (
     {props.columns.permissions.map(column => (
       <TableRow
         row={column}
-        //key={uuqid()}
+        key={uniqid()}
       />))}
   </div>
 );
@@ -269,7 +268,7 @@ class DACApp extends React.Component {
     const INIT_VAL = 0;
     if (this.state.isLogged || this.state.users.find(user => user.name === this.state.username)) {
       this.setState(prevState => ({
-        isLogged: !prevState.isLogged, //to handle both cases of login and logout
+        isLogged: !prevState.isLogged,
         username: '',
         text: prevState.isLogged ? RU.SUCCESSFUL_LOGOUT : RU.SUCCESSFUL_LOGIN,
         object: INIT_VAL,
@@ -302,32 +301,36 @@ class DACApp extends React.Component {
     this.setState({ username: e.target.value });
   }
 
-  handlePermissions() { // fix this shite
+  handlePermissions() { 
     const { permission, object, loggedUsername, targetUser } = this.state;
-    const user = this.state.users.find(userObj => userObj.name === loggedUsername);
-    for (let perm of user.permissions[object]) {
-        if (perm === 'FULL' || perm === permission) {
-          if (perm === 'TRANSFER' && targetUser !== UserNames[0]) {
-            const userPermissions = this.state.users.find(user => user.name === loggedUsername).permissions;
-            let users = this.state.users;
-            for (let user of users) {
-              if (user.name === targetUser) {
-                user.permissions = userPermissions;
-              }
-            }
+    const userPermissions = this.state.users.find(userObj => userObj.name === loggedUsername).permissions;
+    if (targetUser === loggedUsername) {
+      this.setState({
+        text: RU.UNSUCCESSFUL_OPERATION_SAME_USER,
+      });
+      return false;
+    }
+    if (targetUser === UserNames[0]) {
+      this.setState({
+        text: RU.UNSUCCESSFUL_OPERATION_ADMIN,
+      });
+      return false;
+    }
+    for (let perm of userPermissions[object]) {
+      if (perm === 'FULL' || perm === permission) {
+        const users = this.state.users;
+        for (let user of users) {
+          if (user.name === targetUser) {
+            user.permissions[object] = userPermissions[object];
             this.setState({
               users: [...users],
+              text: RU.SUCCESSFUL_OPERATION,
             });
+            return true;
           }
-          this.setState({
-            text: RU.SUCCESSFUL_OPERATION,
-          });
-          return true;
         }
+      }
     }
-    this.setState({
-      text: RU.UNSUCCESSFUL_OPERATION,
-    });
   }
 
   render() {
