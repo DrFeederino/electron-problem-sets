@@ -28,9 +28,25 @@ const RU = { // object with russian locale
   SUCCESSFUL_OPERATION: 'Операция выполнена успешно.',
   UNSUCCESSFUL_OPERATION: 'В доступе отказано.',
   SELECT_USER: 'Выберите пользователя: ',
+  translateText(text) {
+    if (!text) {
+      return;
+    }
+    const keys = Object.keys(this);
+    let translatedText = '';
+    for (let word of text) {
+      for (let key of keys) {
+        if (key === word) { //key is stored in uppercase as each word for permission
+          translatedText += this[key];
+        }
+      }
+      translatedText += ', ';
+    }
+    return translatedText.slice(0, translatedText.length - 2);
+  }
 };
 
-const UserObject = (name, permissions) => ({name: name, permissions: permissions});
+const UserObject = (name, permissions) => ({ name: name, permissions: permissions });
 const Permissions = ['READ', 'WRITE', 'TRANSFER'];
 const getRandomPermission = (numberOfObjs, isAdmin=false) => {
   // Randomizing permission for each object for each user as per the task's requirement
@@ -95,11 +111,14 @@ const Button = (props) => (
   </button>
 );
 
-const Text = (props) => (
+const Text = (props) => {
+  let { text } = props;
+  text = typeof(text) !== "string" ? RU.translateText(text) : text;
+  return (
   <div className={props.class}>
-    {props.text}
+    {text}
   </div>
-);
+)};
 
 const TableRow = (props) => (
   <div className="gridRow">
@@ -112,7 +131,7 @@ const TableColumn = (props) => (
     <TableRow row={props.columns.name} />
     {props.columns.permissions.map(column => (
       <TableRow
-        row={RU[column]}
+        row={column}
         //key={uuqid()}
       />))}
   </div>
@@ -168,17 +187,19 @@ const SelectorComponent = (props) => {
         </select>
       </div>
     );
-  }
-  return (
-    <div>
-      <label htmlFor={props.kind}>{props.text}</label>
-      <select id="props.kind" onChange={props.handleOption}>
-        <option value="" disabled>{RU.SELECT_DEFAULT}</option>
-        {props.arr.map(item => <option key={item} value={item}>{item}</option>)}
-      </select>
-    </div>
+  } else {
+    return (
+      <div>
+        <label htmlFor={props.kind}>{props.text}</label>
+        <select id="props.kind" onChange={props.handleOption}>
+          <option value="" disabled>{RU.SELECT_DEFAULT}</option>
+          {props.arr.map(item => <option key={item} value={item}>{item}</option>)}
+        </select>
+      </div>
     );
-}
+  }
+};
+
 const PermissionComponent = (props) => {
   const ObjectsText = [];
   for (let i = 0; i < NUMBER_OF_OBJECTS; i++) {
