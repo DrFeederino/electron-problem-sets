@@ -10,42 +10,45 @@ Generating ASCII-based password for given data.
 The task is to make a discretionary access control with 7 users and 4 accessing objects.
 #Installation
 To run any of prolbem sets, run following commands in the terminal. 
+
 ```
 cd electron-problem-set-X   # X is a number of problem set
 npm install
 electron-forge start
 ```
+
 #Structure
+
 ```
 .
 ├── electron-problem-set-1                    # Problem set 1
-|   ├── src
-|   |   ├── app.jsx
-|   |   ├── index.html
-|   |   ├── index.js
-|   ├── LICENSE
-|   ├── package.json
+│   ├── src
+│   │   ├── app.jsx
+│   │   ├── index.html
+│   │   ├── index.js
+│   ├── LICENSE
+│   ├── package.json
 ├── electron-problem-set-2                    # Problem set 2
-|   ├── src
-|   |   ├── app.jsx
-|   |   ├── index.html
-|   |   ├── index.js
-|   ├── LICENSE
-|   ├── package.json
+│   ├── src
+│   │   ├── app.jsx
+│   │   ├── index.html
+│   │   ├── index.js
+│   ├── LICENSE
+│   ├── package.json
 ├── electron-problem-set-3                    # Problem set 3
-|   ├── src
-|   |   ├── app.jsx
-|   |   ├── index.html
-|   |   ├── index.js
-|   ├── LICENSE
-|   ├── package.json
+│   ├── src
+│   │   ├── app.jsx
+│   │   ├── index.html
+│   │   ├── index.js
+│   ├── LICENSE
+│   ├── package.json
 ├── electron-problem-set-4                    # Problem set 4
-|   ├── src
-|   |   ├── app.jsx
-|   |   ├── index.html
-|   |   ├── index.js
-|   ├── LICENSE
-|   ├── package.json
+│   ├── src
+│   │   ├── app.jsx
+│   │   ├── index.html
+│   │   ├── index.js
+│   ├── LICENSE
+│   ├── package.json
 ├── .gitignore
 ├── LICENSE
 └── README.md
