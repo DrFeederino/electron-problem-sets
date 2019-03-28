@@ -17,7 +17,7 @@ npm install
 electron-forge start
 ```
 
-#Structure
+# Structure
 
 ```
 .
