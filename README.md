@@ -1,3 +1,10 @@
+# Installation
+To run any of prolbem sets, run following commands in the terminal. 
+```
+cd electron-problem-set-X   # X is a number of problem set
+npm install
+electron-forge start
+```
 # electron-problem-sets
 Problem sets for the class done in Electron.
 # electron-problem-set-1
@@ -8,15 +15,6 @@ Handling calculations for given data.
 Generating ASCII-based password for given data.
 # electron-problem-set-4
 The task is to make a discretionary access control with 7 users and 4 accessing objects.
-#Installation
-To run any of prolbem sets, run following commands in the terminal. 
-
-```
-cd electron-problem-set-X   # X is a number of problem set
-npm install
-electron-forge start
-```
-
 # Structure
 
 ```
